@@ -1,0 +1,8 @@
+releaseType: node
+handleGHRelease: true
+bumpMinorPreMajor: true
+bumpPatchForMinorPreMajor: true
+changelogPath: CHANGELOG.md
+versioning: default
+branches:
+  - main
