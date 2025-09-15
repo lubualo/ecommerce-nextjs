@@ -1,14 +1,17 @@
 'use client';
 
 import { createContext, useContext, useCallback, useState, ReactNode, useEffect } from 'react';
-import { Amplify } from 'aws-amplify';
-import { signIn, signOut, getCurrentUser } from 'aws-amplify/auth';
-import { User, AuthState, LoginCredentials } from '@/types/auth';
+import { signIn, signOut, getCurrentUser, signUp, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
+import { User, AuthState, LoginCredentials, RegisterCredentials, VerificationCredentials } from '@/types/auth';
 import { configureAmplify } from '@/config/amplify';
+import { parseCognitoError, getFriendlyErrorMessage } from '@/lib/auth-utils';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<{ isVerificationRequired: boolean; email: string }>;
+  verifyEmail: (credentials: VerificationCredentials) => Promise<void>;
+  resendVerificationCode: (email: string) => Promise<void>;
 }
 
 const initialState: AuthState = {
@@ -48,6 +51,8 @@ export function AuthProvider({ children }: Props) {
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      
       const { isSignedIn, nextStep } = await signIn({ 
         username: credentials.email,
         password: credentials.password,
@@ -71,7 +76,10 @@ export function AuthProvider({ children }: Props) {
       }
     } catch (error) {
       console.error('Error signing in:', error);
-      throw error;
+      const cognitoError = parseCognitoError(error);
+      const friendlyMessage = getFriendlyErrorMessage(cognitoError);
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(friendlyMessage);
     }
   }, []);
 
@@ -85,7 +93,103 @@ export function AuthProvider({ children }: Props) {
       });
     } catch (error) {
       console.error('Error signing out:', error);
-      throw error;
+      const cognitoError = parseCognitoError(error);
+      const friendlyMessage = getFriendlyErrorMessage(cognitoError);
+      throw new Error(friendlyMessage);
+    }
+  }, []);
+
+  const register = useCallback(async (credentials: RegisterCredentials) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      const { isSignUpComplete } = await signUp({
+        username: credentials.email,
+        password: credentials.password,
+        options: {
+          userAttributes: {
+            email: credentials.email,
+          },
+          autoSignIn: false, // We'll handle verification manually
+        },
+      });
+
+      setState(prev => ({ ...prev, isLoading: false }));
+
+      if (isSignUpComplete) {
+        // User is immediately signed in (unlikely with email verification)
+        const userInfo = await getCurrentUser();
+        const user: User = {
+          id: userInfo.userId,
+          email: userInfo.signInDetails?.loginId || '',
+          name: userInfo.username
+        };
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        return { isVerificationRequired: false, email: credentials.email };
+      } else {
+        // Email verification required
+        return { isVerificationRequired: true, email: credentials.email };
+      }
+    } catch (error) {
+      console.error('Error registering:', error);
+      const cognitoError = parseCognitoError(error);
+      const friendlyMessage = getFriendlyErrorMessage(cognitoError);
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(friendlyMessage);
+    }
+  }, []);
+
+  const verifyEmail = useCallback(async (credentials: VerificationCredentials) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      await confirmSignUp({
+        username: credentials.email,
+        confirmationCode: credentials.code,
+      });
+
+      // After successful verification, sign in the user
+      const { isSignedIn } = await signIn({
+        username: credentials.email,
+        password: credentials.password,
+      });
+
+      if (isSignedIn) {
+        const userInfo = await getCurrentUser();
+        const user: User = {
+          id: userInfo.userId,
+          email: userInfo.signInDetails?.loginId || '',
+          name: userInfo.username
+        };
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      const cognitoError = parseCognitoError(error);
+      const friendlyMessage = getFriendlyErrorMessage(cognitoError);
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(friendlyMessage);
+    }
+  }, []);
+
+  const resendVerificationCode = useCallback(async (email: string) => {
+    try {
+      await resendSignUpCode({
+        username: email,
+      });
+    } catch (error) {
+      console.error('Error resending verification code:', error);
+      const cognitoError = parseCognitoError(error);
+      const friendlyMessage = getFriendlyErrorMessage(cognitoError);
+      throw new Error(friendlyMessage);
     }
   }, []);
 
@@ -95,6 +199,9 @@ export function AuthProvider({ children }: Props) {
         ...state,
         login,
         logout,
+        register,
+        verifyEmail,
+        resendVerificationCode,
       }}
     >
       {children}

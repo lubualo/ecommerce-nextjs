@@ -10,6 +10,18 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface VerificationCredentials {
+  email: string;
+  code: string;
+  password: string; // Required for auto sign-in after verification
+}
+
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
