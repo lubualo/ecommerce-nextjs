@@ -46,6 +46,13 @@ export default function Home() {
               <Button 
                 size="lg" 
                 className="bg-white text-blue-600 hover:bg-gray-200"
+                onClick={() => router.push('/products')}
+              >
+                Browse Products
+              </Button>
+              <Button 
+                size="lg" 
+                className="bg-white text-blue-600 hover:bg-gray-200"
                 onClick={() => router.push('/login')}
               >
                 Sign In

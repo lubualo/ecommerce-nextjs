@@ -24,6 +24,15 @@ export function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => router.push('/products')}
+              className="flex items-center space-x-2"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Products</span>
+            </Button>
+            
             {isAuthenticated ? (
               <>
                 <Button 
