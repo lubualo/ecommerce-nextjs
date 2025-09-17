@@ -1,6 +1,6 @@
 import { Product, ProductsResponse, ProductFilters, ProductSort, PaginationParams, Category } from '@/types/product';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+import { getAuthToken } from './auth-utils';
+import { API_CONFIG } from '@/config/api-config';
 
 class ApiClient {
   private baseUrl: string;
@@ -15,34 +15,65 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     
+    // Get the auth token
+    const authToken = await getAuthToken();
+    
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         ...options.headers,
       },
       ...options,
     };
 
+    // Debug logging
+    console.log(`🌐 API Request:`, {
+      method: options.method || 'GET',
+      url,
+      hasAuth: !!authToken,
+      authToken: authToken ? `${authToken.substring(0, 20)}...` : 'No token',
+      headers: config.headers
+    });
+
     try {
       const response = await fetch(url, config);
       
+      console.log(`📡 API Response:`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        ok: response.ok
+      });
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`❌ API Error Response:`, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log(`✅ API Success:`, {
+        dataType: Array.isArray(data) ? 'array' : 'object',
+        dataLength: Array.isArray(data) ? data.length : 'N/A',
+        data: data
+      });
+      
+      return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('❌ API request failed:', error);
       throw error;
     }
   }
 
   // Products API
-  async getProducts(
+  getProducts = async (
     filters?: ProductFilters,
     sort?: ProductSort,
     pagination?: PaginationParams
-  ): Promise<ProductsResponse> {
+  ): Promise<ProductsResponse | Product[]> => {
+    console.log('🔍 getProducts called with:', { filters, sort, pagination });
+    
     const params = new URLSearchParams();
     
     if (filters?.search) params.append('search', filters.search);
@@ -63,7 +94,9 @@ class ApiClient {
     return this.request<ProductsResponse>(endpoint);
   }
 
-  async getProduct(id: number, slug?: string, sortBy?: string, order?: string): Promise<Product> {
+  getProduct = async (id: number, slug?: string, sortBy?: string, order?: string): Promise<Product> => {
+    console.log('🔍 getProduct called with:', { id, slug, sortBy, order });
+    
     const params = new URLSearchParams();
     params.append('id', id.toString());
     if (slug) params.append('slug', slug);
@@ -75,11 +108,21 @@ class ApiClient {
   }
 
   // Categories API
-  async getCategories(): Promise<Category[]> {
-    return this.request<Category[]>('/category');
+  getCategories = async (id?: number, slug?: string): Promise<Category[]> => {
+    console.log('🔍 getCategories called with:', { id, slug });
+    
+    const params = new URLSearchParams();
+    if (id) params.append('id', id.toString());
+    if (slug) params.append('slug', slug);
+    
+    const queryString = params.toString();
+    const endpoint = `/category${queryString ? `?${queryString}` : ''}`;
+    return this.request<Category[]>(endpoint);
   }
 
-  async getCategory(id: number, slug?: string): Promise<Category> {
+  getCategory = async (id: number, slug?: string): Promise<Category> => {
+    console.log('🔍 getCategory called with:', { id, slug });
+    
     const params = new URLSearchParams();
     params.append('id', id.toString());
     if (slug) params.append('slug', slug);
@@ -89,13 +132,15 @@ class ApiClient {
   }
 
   // Search suggestions
-  async getSearchSuggestions(query: string): Promise<string[]> {
+  getSearchSuggestions = async (query: string): Promise<string[]> => {
+    console.log('🔍 getSearchSuggestions called with:', { query });
+    
     return this.request<string[]>(`/search/suggestions?q=${encodeURIComponent(query)}`);
   }
 }
 
 // Create and export the API client instance
-export const apiClient = new ApiClient(API_BASE_URL);
+export const apiClient = new ApiClient(API_CONFIG.BASE_URL);
 
 // Export individual methods for convenience
 export const {

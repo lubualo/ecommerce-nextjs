@@ -10,6 +10,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
+// Helper function to check if a string is a valid image URL
+function isValidImageUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  
+  // Check if it's a valid URL
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 interface ProductCardProps {
   product: Product;
   onAddToCart?: (product: Product) => void;
@@ -49,7 +62,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <CardHeader className="p-0">
           <div className="relative aspect-square overflow-hidden">
             <Image
-              src={product.path || '/placeholder-product.jpg'}
+              src={isValidImageUrl(product.path) ? product.path : '/placeholder-product.jpg'}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "gambit.cs9ki6quuut2.us-east-1.rds.amazonaws.com",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Gambit AWS RDS",
+            "database": "gambit",
+            "username": "root",
+            "password": "12345678"
+        }
+    ]
+}

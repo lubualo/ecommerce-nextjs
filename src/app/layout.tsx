@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { Navigation } from "@/components/navigation";
 import { ApiStatus } from "@/components/api-status";
+import { AuthDebug } from "@/components/auth-debug";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <Navigation />
           {children}
           <ApiStatus />
+          <AuthDebug />
         </AuthProvider>
       </body>
     </html>

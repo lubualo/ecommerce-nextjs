@@ -18,7 +18,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filters, setFilters] = useState<ProductFilters>({});
-  const [sort, setSort] = useState<ProductSort>({ field: 'createdAt', direction: 'desc' });
+  const [sort, setSort] = useState<ProductSort>({ field: 'created_at', direction: 'desc' });
   const [pagination, setPagination] = useState<PaginationParams>({ page: 1, limit: 12 });
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -57,9 +57,19 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       const response = await getProducts(filters, sort, pagination);
-      setProducts(response.products);
-      setTotalPages(response.totalPages);
-      setTotalProducts(response.total);
+      
+      // Handle both array response and object response formats
+      if (Array.isArray(response)) {
+        // API returns array directly
+        setProducts(response);
+        setTotalPages(1);
+        setTotalProducts(response.length);
+      } else {
+        // API returns object with products array
+        setProducts(response.products || []);
+        setTotalPages(response.totalPages || 1);
+        setTotalProducts(response.total || 0);
+      }
     } catch (error) {
       console.error('Failed to load products:', error);
       toast({

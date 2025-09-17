@@ -70,7 +70,7 @@ export interface ProductFilters {
 }
 
 export interface ProductSort {
-  field: 'name' | 'price' | 'createdAt';
+  field: 'name' | 'price' | 'created_at';
   direction: 'asc' | 'desc';
 }
 

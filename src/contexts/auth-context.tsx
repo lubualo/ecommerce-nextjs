@@ -33,6 +33,7 @@ export function AuthProvider({ children }: Props) {
     // Check if user is already signed in
     getCurrentUser()
       .then(user => {
+        console.log('🔐 User authenticated:', user);
         const userInfo: User = {
           id: user.userId,
           email: user.signInDetails?.loginId || '',
@@ -43,8 +44,10 @@ export function AuthProvider({ children }: Props) {
           isAuthenticated: true,
           isLoading: false
         });
+        console.log('🔐 Auth state set to authenticated');
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log('🔐 User not authenticated:', error);
         setState(prev => ({ ...prev, isLoading: false }));
       });
   }, []);

@@ -1,4 +1,4 @@
-import { AuthError } from 'aws-amplify/auth';
+import { AuthError, fetchAuthSession } from 'aws-amplify/auth';
 
 export interface CognitoError {
   code: string;
@@ -72,4 +72,29 @@ export function isRetryableError(error: CognitoError): boolean {
 export function getRetryDelay(attempt: number): number {
   // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
   return Math.min(1000 * Math.pow(2, attempt - 1), 30000);
+}
+
+/**
+ * Get the current user's JWT token from Cognito
+ * @returns Promise<string | null> - The JWT token or null if not authenticated
+ */
+export async function getAuthToken(): Promise<string | null> {
+  try {
+    console.log('🔑 Getting auth token...');
+    const session = await fetchAuthSession();
+    console.log('🔑 Session:', {
+      hasSession: !!session,
+      hasTokens: !!session.tokens,
+      hasIdToken: !!session.tokens?.idToken,
+      tokenType: typeof session.tokens?.idToken
+    });
+    
+    const token = session.tokens?.idToken?.toString() || null;
+    console.log('🔑 Token result:', token ? `${token.substring(0, 20)}...` : 'No token');
+    
+    return token;
+  } catch (error) {
+    console.error('❌ Failed to get auth token:', error);
+    return null;
+  }
 }

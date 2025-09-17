@@ -14,6 +14,19 @@ import { ArrowLeft, ShoppingCart, Heart, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Helper function to check if a string is a valid image URL
+function isValidImageUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  
+  // Check if it's a valid URL
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -150,7 +163,7 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             <div className="aspect-square overflow-hidden rounded-lg bg-white p-4">
               <Image
-                src={product.path || '/placeholder-product.jpg'}
+                src={isValidImageUrl(product.path) ? product.path : '/placeholder-product.jpg'}
                 alt={product.name}
                 width={600}
                 height={600}
@@ -163,7 +176,7 @@ export default function ProductDetailPage() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="aspect-square overflow-hidden rounded-lg bg-white p-2">
                   <Image
-                    src={product.path || '/placeholder-product.jpg'}
+                    src={isValidImageUrl(product.path) ? product.path : '/placeholder-product.jpg'}
                     alt={`${product.name} view ${i + 1}`}
                     width={150}
                     height={150}

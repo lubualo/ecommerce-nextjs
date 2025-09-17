@@ -4,8 +4,7 @@ export const API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
   
   // Whether to use mock API instead of real API
-  USE_MOCK_API: process.env.NEXT_PUBLIC_USE_MOCK_API === 'true' || 
-                process.env.NODE_ENV === 'development',
+  USE_MOCK_API: process.env.NEXT_PUBLIC_USE_MOCK_API === 'true',
   
   // Mock API settings
   MOCK_DELAY_MIN: 200, // Minimum delay in ms

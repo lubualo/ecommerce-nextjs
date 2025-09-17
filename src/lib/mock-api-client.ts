@@ -51,13 +51,29 @@ class MockApiClient {
           inStock: inStock || undefined
         };
         
+        // Filter ALL products first (simulating database query)
         let filteredProducts = filterProducts(mockProducts, filters);
         
-        // Apply sorting
+        // Sort ALL filtered products (simulating database ORDER BY)
         filteredProducts = sortProducts(filteredProducts, sortBy, order);
         
-        // Generate response
-        const response = generateMockProductsResponse(filteredProducts, page, limit);
+        // Calculate total count BEFORE pagination (simulating COUNT query)
+        const totalCount = filteredProducts.length;
+        
+        // Apply pagination (simulating LIMIT/OFFSET)
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+        
+        // Return paginated response (simulating real API)
+        const response: ProductsResponse = {
+          products: paginatedProducts,
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit)
+        };
+        
         return response as T;
       } else if (endpoint.startsWith('/category?')) {
         // Handle single category request
@@ -95,7 +111,7 @@ class MockApiClient {
     filters?: ProductFilters,
     sort?: ProductSort,
     pagination?: PaginationParams
-  ): Promise<ProductsResponse> => {
+  ): Promise<ProductsResponse | Product[]> => {
     const params = new URLSearchParams();
     
     if (filters?.search) params.append('search', filters.search);
@@ -128,8 +144,14 @@ class MockApiClient {
   }
 
   // Categories API
-  getCategories = async (): Promise<Category[]> => {
-    return this.request<Category[]>('/category');
+  getCategories = async (id?: number, slug?: string): Promise<Category[]> => {
+    const params = new URLSearchParams();
+    if (id) params.append('id', id.toString());
+    if (slug) params.append('slug', slug);
+    
+    const queryString = params.toString();
+    const endpoint = `/category${queryString ? `?${queryString}` : ''}`;
+    return this.request<Category[]>(endpoint);
   }
 
   getCategory = async (id: number, slug?: string): Promise<Category> => {

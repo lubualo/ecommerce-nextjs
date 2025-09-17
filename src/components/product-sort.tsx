@@ -13,8 +13,8 @@ const sortOptions = [
   { value: 'name-desc', label: 'Name: Z to A', field: 'name' as const, direction: 'desc' as const },
   { value: 'price-asc', label: 'Price: Low to High', field: 'price' as const, direction: 'asc' as const },
   { value: 'price-desc', label: 'Price: High to Low', field: 'price' as const, direction: 'desc' as const },
-  { value: 'createdAt-desc', label: 'Newest First', field: 'createdAt' as const, direction: 'desc' as const },
-  { value: 'createdAt-asc', label: 'Oldest First', field: 'createdAt' as const, direction: 'asc' as const },
+  { value: 'created_at-desc', label: 'Newest First', field: 'created_at' as const, direction: 'desc' as const },
+  { value: 'created_at-asc', label: 'Oldest First', field: 'created_at' as const, direction: 'asc' as const },
 ];
 
 export function ProductSortComponent({ sort, onSortChange }: ProductSortProps) {
