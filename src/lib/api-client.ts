@@ -1,5 +1,5 @@
 import { Product, ProductsResponse, ProductFilters, ProductSort, PaginationParams, Category } from '@/types/product';
-import { UserProfile, UpdateProfileRequest } from '@/types/auth';
+import { UserProfile, UpdateProfileRequest, Address, CreateAddressRequest, UpdateAddressRequest } from '@/types/auth';
 import { getAuthToken } from './auth-utils';
 import { API_CONFIG } from '@/config/api-config';
 
@@ -118,6 +118,31 @@ class ApiClient {
       body: JSON.stringify(profileData),
     });
   }
+
+  // Address API
+  getAddresses = async (): Promise<Address[]> => {
+    return this.request<Address[]>('/address');
+  }
+
+  createAddress = async (addressData: CreateAddressRequest): Promise<Address> => {
+    return this.request<Address>('/address', {
+      method: 'POST',
+      body: JSON.stringify(addressData),
+    });
+  }
+
+  updateAddress = async (id: number, addressData: UpdateAddressRequest): Promise<Address> => {
+    return this.request<Address>(`/address/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(addressData),
+    });
+  }
+
+  deleteAddress = async (id: number): Promise<void> => {
+    return this.request<void>(`/address/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 // Create and export the API client instance
@@ -132,4 +157,8 @@ export const {
   getSearchSuggestions,
   getUserProfile,
   updateUserProfile,
+  getAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
 } = apiClient;

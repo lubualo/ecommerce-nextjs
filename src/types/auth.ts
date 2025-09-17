@@ -40,3 +40,34 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
+
+export interface Address {
+  id: number;
+  title: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  phone: string;
+}
+
+export interface CreateAddressRequest {
+  title: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  phone: string;
+}
+
+export interface UpdateAddressRequest {
+  title: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  phone: string;
+}
