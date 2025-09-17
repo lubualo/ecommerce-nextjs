@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
-import { ShoppingCart, User, LogOut, LogIn, UserPlus, Settings } from 'lucide-react';
+import { ShoppingCart, User, LogOut, LogIn, UserPlus, Settings, Package } from 'lucide-react';
 
 export function Navigation() {
   const router = useRouter();
@@ -42,6 +42,14 @@ export function Navigation() {
                 >
                   <User className="w-4 h-4" />
                   <span>Dashboard</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => router.push('/orders')}
+                  className="flex items-center space-x-2"
+                >
+                  <Package className="w-4 h-4" />
+                  <span>Orders</span>
                 </Button>
                 <Button 
                   variant="ghost" 

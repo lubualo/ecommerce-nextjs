@@ -31,12 +31,11 @@ export interface User {
 
 export interface Order {
   id: number;
-  userId: number;
+  userUUID: string;
+  addressId: number;
+  date: string;
   total: number;
-  status: string;
-  createdAt: string;
-  updated: string;
-  items: OrderItem[];
+  Details: OrderItem[];
 }
 
 export interface OrderItem {
@@ -45,7 +44,6 @@ export interface OrderItem {
   productId: number;
   quantity: number;
   price: number;
-  product: Product;
 }
 
 export interface CartItem {
@@ -85,4 +83,19 @@ export interface ProductsResponse {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface OrdersResponse {
+  orders: Order[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface OrderFilters {
+  id?: number;
+  page?: number;
+  fromDate?: string;
+  toDate?: string;
 }

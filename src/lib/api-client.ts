@@ -1,4 +1,4 @@
-import { Product, ProductsResponse, ProductFilters, ProductSort, PaginationParams, Category } from '@/types/product';
+import { Product, ProductsResponse, ProductFilters, ProductSort, PaginationParams, Category, OrdersResponse, OrderFilters, Order } from '@/types/product';
 import { UserProfile, UpdateProfileRequest, Address, CreateAddressRequest, UpdateAddressRequest } from '@/types/auth';
 import { getAuthToken } from './auth-utils';
 import { API_CONFIG } from '@/config/api-config';
@@ -143,6 +143,21 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Orders API
+  getOrders = async (filters?: OrderFilters): Promise<Order[]> => {
+    const params = new URLSearchParams();
+    
+    if (filters?.id) params.append('id', filters.id.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.fromDate) params.append('from_date', filters.fromDate);
+    if (filters?.toDate) params.append('to_date', filters.toDate);
+    
+    const queryString = params.toString();
+    const endpoint = `/order${queryString ? `?${queryString}` : ''}`;
+    
+    return this.request<Order[]>(endpoint);
+  }
 }
 
 // Create and export the API client instance
@@ -161,4 +176,5 @@ export const {
   createAddress,
   updateAddress,
   deleteAddress,
+  getOrders,
 } = apiClient;
