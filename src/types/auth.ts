@@ -2,7 +2,20 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
   // Add any other user properties you need
+}
+
+export interface UserProfile {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
 }
 
 export interface LoginCredentials {

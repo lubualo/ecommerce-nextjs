@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useCallback, useState, ReactNode, useEffect } from 'react';
 import { signIn, signOut, getCurrentUser, signUp, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
-import { User, AuthState, LoginCredentials, RegisterCredentials, VerificationCredentials } from '@/types/auth';
+import { User, AuthState, LoginCredentials, RegisterCredentials, VerificationCredentials, UserProfile } from '@/types/auth';
 import { configureAmplify } from '@/config/amplify';
 import { parseCognitoError, getFriendlyErrorMessage } from '@/lib/auth-utils';
+import { getUserProfile } from '@/lib/api-client';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -12,6 +13,7 @@ interface AuthContextType extends AuthState {
   register: (credentials: RegisterCredentials) => Promise<{ isVerificationRequired: boolean; email: string }>;
   verifyEmail: (credentials: VerificationCredentials) => Promise<void>;
   resendVerificationCode: (email: string) => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
 }
 
 const initialState: AuthState = {
@@ -196,6 +198,25 @@ export function AuthProvider({ children }: Props) {
     }
   }, []);
 
+  const refreshUserProfile = useCallback(async () => {
+    if (!state.isAuthenticated) return;
+    
+    try {
+      const profileData = await getUserProfile();
+      setState(prev => ({
+        ...prev,
+        user: prev.user ? {
+          ...prev.user,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+        } : null
+      }));
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+      // Don't throw error here as it's not critical for auth state
+    }
+  }, [state.isAuthenticated]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -205,6 +226,7 @@ export function AuthProvider({ children }: Props) {
         register,
         verifyEmail,
         resendVerificationCode,
+        refreshUserProfile,
       }}
     >
       {children}

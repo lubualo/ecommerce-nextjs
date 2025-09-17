@@ -80,21 +80,18 @@ export function getRetryDelay(attempt: number): number {
  */
 export async function getAuthToken(): Promise<string | null> {
   try {
-    console.log('🔑 Getting auth token...');
     const session = await fetchAuthSession();
-    console.log('🔑 Session:', {
-      hasSession: !!session,
-      hasTokens: !!session.tokens,
-      hasIdToken: !!session.tokens?.idToken,
-      tokenType: typeof session.tokens?.idToken
-    });
     
-    const token = session.tokens?.idToken?.toString() || null;
-    console.log('🔑 Token result:', token ? `${token.substring(0, 20)}...` : 'No token');
+    // Use Access Token for API calls (backend expects this)
+    let token = session.tokens?.accessToken?.toString() || null;
+    
+    if (!token && session.tokens?.idToken) {
+      token = session.tokens.idToken.toString();
+    }
     
     return token;
   } catch (error) {
-    console.error('❌ Failed to get auth token:', error);
+    console.error('Failed to get auth token:', error);
     return null;
   }
 }
