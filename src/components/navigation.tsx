@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
+import { CartIcon } from "@/components/cart-icon";
 import { ShoppingCart, User, LogOut, LogIn, UserPlus, Settings, Package } from 'lucide-react';
 
 export function Navigation() {
@@ -32,6 +33,8 @@ export function Navigation() {
               <ShoppingCart className="w-4 h-4" />
               <span>Products</span>
             </Button>
+            
+            <CartIcon />
             
             {isAuthenticated ? (
               <>
